@@ -1,9 +1,12 @@
-package com.example.InfoEmpresas;
+package com.example.InfoEmpresas.model;
+
+import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 
@@ -17,6 +20,9 @@ public class InfoEmpresas {
     private String nombre;
     private String descripcion;
     private String direccion;
+    
+    @OneToMany(mappedBy = "empresa")
+    private List<Empleado> empleados;
 
     public InfoEmpresas() {
     }
