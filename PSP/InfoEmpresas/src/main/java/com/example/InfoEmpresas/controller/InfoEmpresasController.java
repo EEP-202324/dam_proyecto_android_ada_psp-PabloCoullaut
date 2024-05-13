@@ -37,36 +37,6 @@ public class InfoEmpresasController {
     }
     
     @GetMapping
-    public ResponseEntity<?> getAllInfoEmpresas(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(defaultValue = "id,asc") String[] sort,
-            @RequestParam(required = false) String nombre) {
-
-        if (page != null && size != null) {
-            Pageable pageable = PageRequest.of(page, size, Sort.by(sort[0]).descending());
-
-            Page<InfoEmpresas> infoEmpresasPage;
-            if (nombre != null) {
-                infoEmpresasPage = infoEmpresasRepository.findByNombre(nombre, pageable);
-            } else {
-                infoEmpresasPage = infoEmpresasRepository.findAll(pageable);
-            }
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("infoEmpresas", infoEmpresasPage.getContent());
-            response.put("currentPage", infoEmpresasPage.getNumber());
-            response.put("totalItems", infoEmpresasPage.getTotalElements());
-            response.put("totalPages", infoEmpresasPage.getTotalPages());
-
-            return ResponseEntity.ok(response);
-        } else {
-            List<InfoEmpresas> allInfoEmpresas = infoEmpresasRepository.findAll();
-            return ResponseEntity.ok(allInfoEmpresas);
-        }
-    }
-    
-    @GetMapping
     public List<InfoEmpresas> getAllInfoEmpresas() { 
     	return infoEmpresasRepository.findAll();
     }
