@@ -29,12 +29,14 @@ class MainActivity : ComponentActivity() {
             viewModel.apiService = apiService
 
             LaunchedEffect(Unit) {
+                Log.d("MainActivity", "LaunchedEffect: Calling getAllEmpresas")
                 viewModel.getAllEmpresas()
             }
 
             val empresas by viewModel.empresas.observeAsState(emptyList())
             Log.d("MainActivity", "Observed empresas: $empresas")
             MainScreen(empresas = empresas, onAddEmpresa = { empresa ->
+                Log.d("MainActivity", "onAddEmpresa: $empresa")
                 viewModel.createEmpresa(empresa)
             })
         }
@@ -48,6 +50,7 @@ fun MainScreen(empresas: List<InfoEmpresas>, onAddEmpresa: (InfoEmpresas) -> Uni
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf("") }
 
     if (showDialog) {
         AlertDialog(
@@ -75,6 +78,7 @@ fun MainScreen(empresas: List<InfoEmpresas>, onAddEmpresa: (InfoEmpresas) -> Uni
             confirmButton = {
                 Button(
                     onClick = {
+                        Log.d("MainScreen", "Adding empresa: $nombre, $descripcion, $direccion")
                         onAddEmpresa(
                             InfoEmpresas(
                                 nombre = nombre,
@@ -106,7 +110,22 @@ fun MainScreen(empresas: List<InfoEmpresas>, onAddEmpresa: (InfoEmpresas) -> Uni
             }
         }
     ) {
-        EmpresaList(empresas)
+        Column(modifier = Modifier.fillMaxSize()) {
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Buscar Empresa") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+            val filteredEmpresas = empresas.filter { empresa ->
+                empresa.nombre.contains(searchQuery, ignoreCase = true)
+            }
+
+            EmpresaList(empresas = filteredEmpresas)
+        }
     }
 }
 
@@ -125,13 +144,22 @@ fun EmpresaList(empresas: List<InfoEmpresas>) {
 
 @Composable
 fun EmpresaItem(empresa: InfoEmpresas) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        elevation = 4.dp
     ) {
-        Text(text = empresa.nombre, style = MaterialTheme.typography.h6)
-        Text(text = empresa.descripcion, style = MaterialTheme.typography.body2)
-        Text(text = empresa.direccion, style = MaterialTheme.typography.body2)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(text = "Empresa: ${empresa.nombre}", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Descripción: ${empresa.descripcion}", style = MaterialTheme.typography.body1)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Dirección: ${empresa.direccion}", style = MaterialTheme.typography.body1)
+        }
     }
 }
