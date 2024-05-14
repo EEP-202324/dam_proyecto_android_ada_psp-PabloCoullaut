@@ -8,9 +8,9 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-    @GET("/infoempresas")
+    @GET("infoempresas")
     suspend fun getAllEmpresas(): List<InfoEmpresas>
 
-    @POST("/infoempresas")
+    @POST("infoempresas")
     suspend fun createEmpresa(@Body empresa: InfoEmpresas): InfoEmpresas
 }

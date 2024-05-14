@@ -1,112 +1,137 @@
 package com.eep.dam.android.androidinfoempresas.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.eep.dam.android.androidinfoempresas.model.InfoEmpresas
-import androidx.compose.material3.Button
-import androidx.compose.material3.TextField
-import com.eep.dam.android.androidinfoempresas.viewmodel.EmpresasViewModel
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.eep.dam.android.androidinfoempresas.api.RetrofitClient
+import com.eep.dam.android.androidinfoempresas.model.InfoEmpresas
+import com.eep.dam.android.androidinfoempresas.viewmodel.EmpresaViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Screen()
+            val apiService = RetrofitClient.apiRepository
+            val viewModel: EmpresaViewModel = viewModel()
+            viewModel.apiService = apiService
+
+            LaunchedEffect(Unit) {
+                viewModel.getAllEmpresas()
+            }
+
+            val empresas by viewModel.empresas.observeAsState(emptyList())
+            Log.d("MainActivity", "Observed empresas: $empresas")
+            MainScreen(empresas = empresas, onAddEmpresa = { empresa ->
+                viewModel.createEmpresa(empresa)
+            })
         }
     }
 }
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun Screen() {
-    val empresasViewModel: EmpresasViewModel = viewModel()
+fun MainScreen(empresas: List<InfoEmpresas>, onAddEmpresa: (InfoEmpresas) -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+    var nombre by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
+    var direccion by remember { mutableStateOf("") }
 
-    val empresas by empresasViewModel.empresas.observeAsState(initial = emptyList())
-
-    LaunchedEffect(key1 = true) {
-        empresasViewModel.fetchEmpresas()
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Añadir Empresa") },
+            text = {
+                Column {
+                    TextField(
+                        value = nombre,
+                        onValueChange = { nombre = it },
+                        label = { Text("Nombre") }
+                    )
+                    TextField(
+                        value = descripcion,
+                        onValueChange = { descripcion = it },
+                        label = { Text("Descripción") }
+                    )
+                    TextField(
+                        value = direccion,
+                        onValueChange = { direccion = it },
+                        label = { Text("Dirección") }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onAddEmpresa(
+                            InfoEmpresas(
+                                nombre = nombre,
+                                descripcion = descripcion,
+                                direccion = direccion
+                            )
+                        )
+                        nombre = ""
+                        descripcion = ""
+                        direccion = ""
+                        showDialog = false
+                    }
+                ) {
+                    Text("Añadir")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 
-    EmpresaList(empresas = empresas)
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showDialog = true }) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
+        }
+    ) {
+        EmpresaList(empresas)
+    }
 }
 
 @Composable
 fun EmpresaList(empresas: List<InfoEmpresas>) {
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp)
+    ) {
         items(empresas) { empresa ->
-            EmpresaListItem(empresa = empresa)
-            Divider(color = Color.Gray)
+            EmpresaItem(empresa)
+            Divider()
         }
     }
 }
 
 @Composable
-fun EmpresaListItem(empresa: InfoEmpresas) {
+fun EmpresaItem(empresa: InfoEmpresas) {
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .padding(8.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.Center
     ) {
-        Text(text = empresa.nombre, fontSize = 18.sp)
-        Text(text = empresa.descripcion, fontSize = 14.sp)
-        Text(text = empresa.direccion, fontSize = 14.sp)
-    }
-}
-
-@Composable
-fun AddEmpresa(onAddEmpresa: (InfoEmpresas) -> Unit) {
-    val nombreState = remember { mutableStateOf("") }
-    val descripcionState = remember { mutableStateOf("") }
-    val direccionState = remember { mutableStateOf("") }
-
-    Column {
-        TextField(
-            value = nombreState.value,
-            onValueChange = { nombreState.value = it },
-            label = { Text("Nombre de la empresa") }
-        )
-        TextField(
-            value = descripcionState.value,
-            onValueChange = { descripcionState.value = it },
-            label = { Text("Descripción de la empresa") }
-        )
-        TextField(
-            value = direccionState.value,
-            onValueChange = { direccionState.value = it },
-            label = { Text("Dirección de la empresa") }
-        )
-        Button(onClick = {
-            val nuevaEmpresa = InfoEmpresas(
-                nombre = nombreState.value,
-                descripcion = descripcionState.value,
-                direccion = direccionState.value
-            )
-            onAddEmpresa(nuevaEmpresa)
-            nombreState.value = ""
-            descripcionState.value = ""
-            direccionState.value = ""
-        }) {
-            Text("Añadir Empresa")
-        }
+        Text(text = empresa.nombre, style = MaterialTheme.typography.h6)
+        Text(text = empresa.descripcion, style = MaterialTheme.typography.body2)
+        Text(text = empresa.direccion, style = MaterialTheme.typography.body2)
     }
 }
