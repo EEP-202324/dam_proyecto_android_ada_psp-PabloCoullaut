@@ -23,7 +23,7 @@ import com.example.InfoEmpresas.repository.InfoEmpresasRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/api/empleados")
+@RequestMapping("/empleados")
 public class EmpleadoController {
 
     @Autowired
@@ -35,6 +35,11 @@ public class EmpleadoController {
     @GetMapping
     public List<Empleado> getAllEmpleados() {
         return empleadoRepository.findAll();
+    }
+    
+    @GetMapping("/empresa/{empresaId}")
+    public List<Empleado> getEmpleadosByEmpresaId(@PathVariable Long empresaId) {
+        return empleadoRepository.findByEmpresaId(empresaId);
     }
 
     @PostMapping
