@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,23 +34,32 @@ public class EmpleadoController {
     private InfoEmpresasRepository infoEmpresasRepository;
 
     @GetMapping
-    public List<Empleado> getAllEmpleados() {
-        return empleadoRepository.findAll();
+    public ResponseEntity<List<Empleado>> getAllEmpleados() {
+        List<Empleado> empleados = empleadoRepository.findAll();
+        if (empleados.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(empleados, HttpStatus.OK);
     }
-    
+
     @GetMapping("/empresa/{empresaId}")
-    public List<Empleado> getEmpleadosByEmpresaId(@PathVariable Long empresaId) {
-        return empleadoRepository.findByEmpresaId(empresaId);
+    public ResponseEntity<List<Empleado>> getEmpleadosByEmpresaId(@PathVariable Long empresaId) {
+        List<Empleado> empleados = empleadoRepository.findByEmpresaId(empresaId);
+        if (empleados.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(empleados, HttpStatus.OK);
     }
 
     @PostMapping
-    public Empleado createEmpleado(@RequestBody Empleado empleado, @RequestParam String nombreEmpresa) {
+    public ResponseEntity<Empleado> createEmpleado(@RequestBody Empleado empleado, @RequestParam String nombreEmpresa) {
         Optional<InfoEmpresas> empresaOptional = infoEmpresasRepository.findByNombre(nombreEmpresa);
         if (empresaOptional.isPresent()) {
             empleado.setEmpresa(empresaOptional.get());
-            return empleadoRepository.save(empleado);
+            Empleado savedEmpleado = empleadoRepository.save(empleado);
+            return new ResponseEntity<>(savedEmpleado, HttpStatus.CREATED);
         } else {
-            throw new EntityNotFoundException("La empresa especificada no existe");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

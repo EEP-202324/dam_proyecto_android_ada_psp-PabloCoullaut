@@ -54,6 +54,20 @@ class EmpresaViewModel : ViewModel() {
         }
     }
 
+    fun updateEmpresa(id: Long, empresa: InfoEmpresas) {
+        viewModelScope.launch {
+            try {
+                val updatedEmpresa = withContext(Dispatchers.IO) {
+                    apiService.updateEmpresa(id, empresa)
+                }
+                Log.d("EmpresaViewModel", "Empresa updated successfully: $updatedEmpresa")
+                getAllEmpresas()
+            } catch (e: Exception) {
+                Log.e("EmpresaViewModel", "Error updating empresa", e)
+            }
+        }
+    }
+
     fun getEmpleadosByEmpresaId(empresaId: Long) {
         viewModelScope.launch {
             try {
@@ -79,6 +93,48 @@ class EmpresaViewModel : ViewModel() {
                 getEmpleadosByEmpresaId(newEmpleado.empresa.id ?: 0)
             } catch (e: Exception) {
                 Log.e("EmpresaViewModel", "Error creating empleado", e)
+            }
+        }
+    }
+
+    fun updateEmpleado(id: Long, empleado: Empleado) {
+        viewModelScope.launch {
+            try {
+                val updatedEmpleado = withContext(Dispatchers.IO) {
+                    apiService.updateEmpleado(id, empleado)
+                }
+                Log.d("EmpresaViewModel", "Empleado updated successfully: $updatedEmpleado")
+                getEmpleadosByEmpresaId(empleado.empresa.id ?: 0)
+            } catch (e: Exception) {
+                Log.e("EmpresaViewModel", "Error updating empleado", e)
+            }
+        }
+    }
+
+    fun deleteEmpresa(id: Long) {
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    apiService.deleteEmpresa(id)
+                }
+                Log.d("EmpresaViewModel", "Empresa deleted successfully")
+                getAllEmpresas()
+            } catch (e: Exception) {
+                Log.e("EmpresaViewModel", "Error deleting empresa", e)
+            }
+        }
+    }
+
+    fun deleteEmpleado(id: Long, empresaId: Long) {
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    apiService.deleteEmpleado(id)
+                }
+                Log.d("EmpresaViewModel", "Empleado deleted successfully")
+                getEmpleadosByEmpresaId(empresaId)
+            } catch (e: Exception) {
+                Log.e("EmpresaViewModel", "Error deleting empleado", e)
             }
         }
     }

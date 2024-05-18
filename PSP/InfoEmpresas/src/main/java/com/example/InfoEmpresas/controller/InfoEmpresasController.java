@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,13 +33,18 @@ public class InfoEmpresasController {
     private InfoEmpresasRepository infoEmpresasRepository;
 
     @PostMapping
-    public InfoEmpresas crearInfoEmpresas(@RequestBody InfoEmpresas infoEmpresas) {
-        return infoEmpresasRepository.save(infoEmpresas);
+    public ResponseEntity<InfoEmpresas> crearInfoEmpresas(@RequestBody InfoEmpresas infoEmpresas) {
+        InfoEmpresas savedInfoEmpresas = infoEmpresasRepository.save(infoEmpresas);
+        return new ResponseEntity<>(savedInfoEmpresas, HttpStatus.CREATED);
     }
-    
+
     @GetMapping
-    public List<InfoEmpresas> getAllInfoEmpresas() { 
-    	return infoEmpresasRepository.findAll();
+    public ResponseEntity<List<InfoEmpresas>> getAllInfoEmpresas() {
+        List<InfoEmpresas> infoEmpresasList = infoEmpresasRepository.findAll();
+        if (infoEmpresasList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(infoEmpresasList, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
