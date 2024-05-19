@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,16 +50,6 @@ public class EmpleadoController {
             return empleadoRepository.save(empleado);
         } else {
             throw new EntityNotFoundException("La empresa especificada no existe");
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Empleado> getEmpleadoById(@PathVariable Long id) {
-        Optional<Empleado> empleadoOptional = empleadoRepository.findById(id);
-        if (empleadoOptional.isPresent()) {
-            return ResponseEntity.ok(empleadoOptional.get());
-        } else {
-            return ResponseEntity.notFound().build();
         }
     }
 
