@@ -2,7 +2,6 @@ package com.eep.dam.android.androidinfoempresas.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -327,7 +326,11 @@ fun EmpresaDetailScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showDialog = true }) {
+            FloatingActionButton(onClick = {
+                showDialog = true
+                nombre = ""
+                cargo = ""
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
         }
@@ -450,8 +453,7 @@ fun EmpleadoDialog(
                 Box(modifier = Modifier.fillMaxWidth()) {
                     TextField(
                         value = cargo,
-                        onValueChange = {},
-                        readOnly = true,
+                        onValueChange = onCargoChange,
                         label = { Text("Cargo") },
                         trailingIcon = {
                             IconButton(onClick = { expanded = !expanded }) {

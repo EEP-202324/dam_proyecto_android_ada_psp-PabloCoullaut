@@ -34,32 +34,23 @@ public class EmpleadoController {
     private InfoEmpresasRepository infoEmpresasRepository;
 
     @GetMapping
-    public ResponseEntity<List<Empleado>> getAllEmpleados() {
-        List<Empleado> empleados = empleadoRepository.findAll();
-        if (empleados.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(empleados, HttpStatus.OK);
+    public List<Empleado> getAllEmpleados() {
+        return empleadoRepository.findAll();
     }
-
+    
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<Empleado>> getEmpleadosByEmpresaId(@PathVariable Long empresaId) {
-        List<Empleado> empleados = empleadoRepository.findByEmpresaId(empresaId);
-        if (empleados.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(empleados, HttpStatus.OK);
+    public List<Empleado> getEmpleadosByEmpresaId(@PathVariable Long empresaId) {
+        return empleadoRepository.findByEmpresaId(empresaId);
     }
 
     @PostMapping
-    public ResponseEntity<Empleado> createEmpleado(@RequestBody Empleado empleado, @RequestParam String nombreEmpresa) {
+    public Empleado createEmpleado(@RequestBody Empleado empleado, @RequestParam String nombreEmpresa) {
         Optional<InfoEmpresas> empresaOptional = infoEmpresasRepository.findByNombre(nombreEmpresa);
         if (empresaOptional.isPresent()) {
             empleado.setEmpresa(empresaOptional.get());
-            Empleado savedEmpleado = empleadoRepository.save(empleado);
-            return new ResponseEntity<>(savedEmpleado, HttpStatus.CREATED);
+            return empleadoRepository.save(empleado);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new EntityNotFoundException("La empresa especificada no existe");
         }
     }
 

@@ -33,18 +33,13 @@ public class InfoEmpresasController {
     private InfoEmpresasRepository infoEmpresasRepository;
 
     @PostMapping
-    public ResponseEntity<InfoEmpresas> crearInfoEmpresas(@RequestBody InfoEmpresas infoEmpresas) {
-        InfoEmpresas savedInfoEmpresas = infoEmpresasRepository.save(infoEmpresas);
-        return new ResponseEntity<>(savedInfoEmpresas, HttpStatus.CREATED);
+    public InfoEmpresas crearInfoEmpresas(@RequestBody InfoEmpresas infoEmpresas) {
+        return infoEmpresasRepository.save(infoEmpresas);
     }
-
+    
     @GetMapping
-    public ResponseEntity<List<InfoEmpresas>> getAllInfoEmpresas() {
-        List<InfoEmpresas> infoEmpresasList = infoEmpresasRepository.findAll();
-        if (infoEmpresasList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(infoEmpresasList, HttpStatus.OK);
+    public List<InfoEmpresas> getAllInfoEmpresas() { 
+    	return infoEmpresasRepository.findAll();
     }
 
     @GetMapping("/{id}")
